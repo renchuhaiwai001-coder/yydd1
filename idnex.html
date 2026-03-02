@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>姻缘测算H5</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    padding:0;
+    background:#ffe6f0;
+}
+.container{
+    max-width:600px;
+    margin:auto;
+    background:#fff0f5;
+    padding:20px;
+    border-radius:15px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+h2{
+    text-align:center;
+    color:#d6336c;
+}
+p{
+    text-align:center;
+    color:#a6004d;
+    font-weight:bold;
+}
+input, select, button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    font-size:16px;
+    border-radius:8px;
+    border:1px solid #f99ecb;
+    box-sizing:border-box;
+}
+button{
+    background:#ff4da6;
+    color:#fff;
+    font-weight:bold;
+    cursor:pointer;
+    border:none;
+    transition:0.3s;
+}
+button:hover{
+    background:#e60073;
+}
+label{
+    margin-top:10px;
+    display:block;
+    font-weight:bold;
+    color:#d6336c;
+}
+.sign-result{
+    background:#ffd9ec;
+    padding:15px;
+    margin-top:20px;
+    border-radius:10px;
+    opacity:0;
+    transition: opacity 1s;
+}
+.sign-title{
+    font-size:20px;
+    font-weight:bold;
+    color:#c7005f;
+}
+.sign-text, .sign-easy{
+    margin-top:10px;
+    color:#900047;
+}
+.sign-risk{
+    margin-top:10px;
+    font-weight:bold;
+    color:red;
+}
+.trust{
+    margin-top:20px;
+    background:#ffe0f2;
+    padding:10px;
+    border-radius:8px;
+    font-weight:bold;
+    text-align:center;
+    color:#b3005c;
+    font-size:16px;
+}
+input:focus, select:focus{
+    outline:none;
+    border:2px solid #ff4da6;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>测一测你的姻缘走向</h2>
+<p>填写下列信息，即可了解你们的感情现状与发展趋势</p>
+
+<label>姓名</label>
+<input id="name1" placeholder="你的姓名">
+
+<label>出生日期</label>
+<input id="birth1" type="date">
+
+<label>对方姓名</label>
+<input id="name2" placeholder="对方姓名">
+
+<label>对方出生日期</label>
+<input id="birth2" type="date">
+
+<label>当前关系状态</label>
+<input id="currentStatus" placeholder="例如：暧昧/热恋/分手等">
+
+<label>最大担忧</label>
+<input id="maxWorry" placeholder="你最担心的事情">
+
+<label>想要解决的问题</label>
+<input id="goal" placeholder="你希望得到的答案">
+
+<label>联系方式（手机/WhatsApp）</label>
+<div style="display:flex;">
+<select id="countryCode" style="width:35%; margin-right:5px;">
+    <!-- 全球常用区号示例 -->
+    <option value="86">中国 +86</option>
+    <option value="852">香港 +852</option>
+    <option value="65">新加坡 +65</option>
+    <option value="60">马来西亚 +60</option>
+    <option value="1">美国/加拿大 +1</option>
+</select>
+<input id="contact" type="tel" style="width:65%;" placeholder="请输入手机号（仅数字）" pattern="[0-9]*">
+</div>
+
+<button onclick="calculateSign()">立即测算</button>
+
+<div class="sign-result" id="signContainer">
+    <div class="sign-title" id="signTitle"></div>
+    <div class="sign-text" id="signText"></div>
+    <div class="sign-easy" id="signEasy"></div>
+    <div class="sign-risk" id="signRisk"></div>
+</div>
+
+<div class="trust" id="trust">
+    已有 <span id="trustNum"></span> 人参与测算，助力更多人解决感情问题
+</div>
+
+<button id="privateBtn" style="margin-top:20px; display:none;">立即获取专属解读</button>
+
+</div>
+
+<script>
+// ---- 24条签文 ----
+const signs = [
+    {title:"情深得合", text:"这段关系走得很顺，顺得不像偶然，只是能不能走到最后，还要看接下来。", easy:"你们的关系目前处在一个相对顺畅的阶段...", risk:"危险指数5%"},
+    {title:"缘近心合", text:"你在认真，他也在回应。这是少见的对等，但你们的期待真的一致吗？", easy:"你的付出正在被看见，也得到了回应...", risk:"危险等级5%"},
+    {title:"情长可守", text:"不轰烈却稳定，不刺激却长久，前提是，你们都愿意坚持。", easy:"这段感情不靠激情维系，而是靠稳定与习惯...", risk:"危险指数5%"},
+    {title:"因爱得益", text:"关系正在变好，气氛明显升温，你下一步怎么走很关键。", easy:"关系正在往好的方向变化，对方的态度比之前更开放...", risk:"危险指数25%"},
+    {title:"同心同路", text:"从朋友开始是最稳的路线，只差一次越界的勇气。", easy:"这段关系建立在熟悉和信任之上...", risk:"危险指数25%"},
+    {title:"两心相感", text:"你不是单方面心动，他也感受到了。只是现在还没到摊牌的时候。", easy:"这不是你一个人的感觉...", risk:"危险指数25%"},
+    {title:"误散情回", text:"冷淡在松动，紧张在缓和。谁先低头，会有不同的结局。", easy:"关系中的紧张点正在缓解...", risk:"危险指数25%"},
+    {title:"请缓成缘", text:"不是没有进展，是一直很慢，你等得到那一步吗？", easy:"这段关系不是没可能，而是进展非常慢...", risk:"危险指数50%"},
+    {title:"乍遇成劫", text:"他出现得很突然，热度也来很快，但这段缘分能不能留住？", easy:"他的出现对你影响不小...", risk:"危险指数50%"},
+    {title:"情悦心开", text:"话说得很好听，但行动却不多，你分得清这是喜欢，还是情绪价值吗？", easy:"你在这段关系中得到了不少的情绪回应...", risk:"危险指数50%"},
+    {title:"情入无声", text:"没拒绝也没确认，这是暧昧还是拖延？", easy:"对方没有拒绝你，但始终保持模糊空间...", risk:"危险指数50%"},
+    {title:"情藏未露", text:"他在看你，但还没决定。你接下来的选择会被记住。", easy:"他在观察你的一举一动，但还没有下决定...", risk:"危险等级50%"},
+    {title:"漂泊之缘", text:"陪你走一段的人未必陪你走一生，你想要的是现在还是未来？", easy:"这段关系更像是阶段性的陪伴，而非稳定的落点...", risk:"危险指数50%"},
+    {title:"情炽易伤", text:"爱得很热也烧得很快，这段关系真的稳吗？", easy:"吸引力很强但稳定性不足...", risk:"危险指数75%"},
+    {title:"情定终成", text:"现在看起来刚刚好，但真正的问题还没有浮出水面。", easy:"现在的平稳很可能只是阶段性的...", risk:"危险指数75%"},
+    {title:"情重失衡", text:"这段关系承受得太多了，再这样下去迟早会失衡。", easy:"这段关系承载了过多的期望与压力...", risk:"危险指数75%"},
+    {title:"情动骤变", text:"关系可能突然改变，来得很快让你未必有所准备。", easy:"关系存在突变的风险...", risk:"危险指数75%"},
+    {title:"为情自损", text:"你的付出明显更多，这份不平衡正在累积代价。", easy:"你在不断付出，却没得到对等的回应...", risk:"危险指数75%"},
+    {title:"情困难出", text:"你已经很努力了。可是这段关系只是在消耗你，再坚持你可能会失去自己。", easy:"你已经尽力了，但关系本身并没有改善...", risk:"危险指数95%"},
+    {title:"缘迟未圆", text:"永远差一步，永远没结果，这不是巧合。", easy:"这段关系始终卡在差一步...", risk:"危险指数95%"},
+    {title:"缘阻情隔", text:"你在靠近，他却在后退，这条路很难走通。", easy:"你在努力沟通，但对方并未真正打开...", risk:"危险指数95%"},
+    {title:"情散难聚", text:"不是突然冷，是早就开始散了，只是你现在才发现。", easy:"关系正在慢慢散掉...", risk:"危险指数95%"},
+    {title:"嫁缘有数", text:"你的位置从一开始就不对。越是认真越容易受伤。", easy:"你在这段关系中始终处于不利位置...", risk:"危险指数95%"},
+    {title:"情断须决", text:"不能再拖了！再犹豫代价只会更大。", easy:"这段关系已经逼近临界点...", risk:"危险指数95%"}
+];
+
+// 首屏信任度随机
+document.getElementById("trustNum").innerText = (Math.floor(Math.random()*900000)+100000).toLocaleString();
+
+function calculateSign(){
+    const name1 = document.getElementById("name1").value.trim();
+    const birth1 = document.getElementById("birth1").value.trim();
+    const name2 = document.getElementById("name2").value.trim();
+    const birth2 = document.getElementById("birth2").value.trim();
+    const currentStatus = document.getElementById("currentStatus").value.trim();
+    const maxWorry = document.getElementById("maxWorry").value.trim();
+    const goal = document.getElementById("goal").value.trim();
+    const countryCode = document.getElementById("countryCode").value;
+    const contact = document.getElementById("contact").value.trim();
+
+    if(!name1||!birth1||!name2||!birth2||!currentStatus||!maxWorry||!goal||!contact){
+        alert("请完整填写所有信息！");
+        return;
+    }
+    if(!/^\d+$/.test(contact)){
+        alert("联系方式请输入数字！");
+        return;
+    }
+
+    // 随机签
+    const sign = signs[Math.floor(Math.random()*signs.length)];
+
+    document.getElementById("signTitle").innerText = sign.title;
+    document.getElementById("signText").innerText = sign.text;
+    document.getElementById("signEasy").innerText = sign.easy;
+    document.getElementById("signRisk").innerText = sign.risk;
+    document.getElementById("signContainer").style.opacity = 0;
+    document.getElementById("signContainer").style.display = "block";
+    setTimeout(()=>{document.getElementById("signContainer").style.opacity = 1;},50);
+    document.getElementById("privateBtn").style.display = "block";
+
+    // Make 测算提交
+    const submitPayload = {
+        时间戳: new Date().toISOString(),
+        姓名: name1,
+        出生日期: birth1,
+        对方姓名: name2,
+        对方出生日期: birth2,
+        当前关系状态: currentStatus,
+        最大担忧: maxWorry,
+        想要解决的问题: goal,
+        抽中签标题: sign.title,
+        危机等级: sign.risk,
+        来源平台: "H5前端",
+        联系方式: "+"+countryCode+contact
+    };
+
+    fetch("https://hook.eu1.make.com/8pm3npoqzhb9uwdfcyrxfl3ksgkvfpjm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(submitPayload)})
+        .then(()=>console.log("测算提交成功")).catch(()=>console.log("测算提交失败"));
+}
+
+// 私域跳转
+document.getElementById("privateBtn").onclick=function(){
+    const signTitle = document.getElementById("signTitle").innerText;
+    const signRisk = document.getElementById("signRisk").innerText;
+    const userName = document.getElementById("name1").value;
+
+    const message = "你好，我叫"+userName+"，刚刚完成了姻缘测算。\n抽中签文："+signTitle+"\n"+signRisk+"\n想获取我的专属深度解析。";
+    const encodedMessage = encodeURIComponent(message);
+
+    // 私域点击埋点
+    fetch("https://hook.eu1.make.com/pk8imlpkq9gxqcwyijbfzk2jj0pz8nm8",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+        时间戳:new Date().toISOString(),
+        事件:"private_click",
+        姓名:userName,
+        抽中签标题:signTitle,
+        危机等级:signRisk
+    })}).finally(()=>{
+        window.location.href="https://wa.me/85252150906?text="+encodedMessage;
+    });
+};
+</script>
+
+</body>
+</html>
