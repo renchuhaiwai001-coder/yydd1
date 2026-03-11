@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<meta charset="UTF-8">
+<title>情感能量匹配分析</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- TikTok Pixel Code Start -->
 <script>
@@ -16,9 +19,6 @@ var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n
 </script>
 <!-- TikTok Pixel Code End -->
 
-<meta charset="UTF-8">
-<title>情感能量匹配分析</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body{
     font-family: Arial, sans-serif;
@@ -120,7 +120,7 @@ input:focus, select:focus{
 <input id="birth1" type="date">
 
 <label>对方姓名</label>
-<input id="name2" placeholder="对方姓名">
+<input id="name2" placeholder="如果没有另一半可留空">
 
 <label>对方出生日期</label>
 <input id="birth2" type="date">
@@ -276,7 +276,7 @@ function calculateSign(){
     const countryCode = document.getElementById("countryCode").value;
     const contact = document.getElementById("contact").value.trim();
 
-    if(!name1||!birth1||!name2||!birth2||!currentStatus||!maxWorry||!goal||!contact){
+    if(!name1||!birth1||!currentStatus||!maxWorry||!goal||!contact){
         alert("请完整填写所有信息！");
         return;
     }
